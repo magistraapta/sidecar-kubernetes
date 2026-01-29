@@ -1,0 +1,20 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: app-ingress
+  namespace: go-kubernetes
+  labels:
+    app.kubernetes.io/name: app-ingress
+spec:
+  ingressClassName: nginx
+  rules:
+  - host: magistra.k8s.local
+    http:
+      paths:
+      - pathType: Prefix
+        path: "/"
+        backend:
+          service:
+            name: go-app-service
+            port:
+              number: 8080

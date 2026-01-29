@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: db-config
+  namespace: go-kubernetes
+data:
+  DB_USERNAME: postgres
+  DB_NAME: go-kubernetes
+  DB_HOST: postgres-headless-service
+  DB_PORT: "5432"
+

@@ -1,0 +1,54 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: database
+  namespace: go-kubernetes
+spec:
+  selector:
+    matchLabels:
+      app: database
+  serviceName: "postgres-headless-service"
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: database
+    spec:
+      containers:
+      - name: database
+        image: postgres:alpine
+        ports:
+        - containerPort: 5432
+          name: database
+        # PostgreSQL image requires these specific env vars for initialization
+        env:
+        - name: POSTGRES_USER
+          valueFrom:
+            configMapKeyRef:
+              name: db-config
+              key: DB_USERNAME
+        - name: POSTGRES_DB
+          valueFrom:
+            configMapKeyRef:
+              name: db-config
+              key: DB_NAME
+        - name: POSTGRES_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: postgres-secret
+              key: db-password
+        # Mount to a different path to avoid conflicts with container's data dir
+        - name: PGDATA
+          value: /var/lib/postgresql/mount/pgdata
+        volumeMounts:
+        - name: database-volume
+          mountPath: /var/lib/postgresql/mount
+  volumeClaimTemplates:
+  - metadata:
+      name: database-volume
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      storageClassName: standard
+      resources:
+        requests:
+          storage: 1Gi
